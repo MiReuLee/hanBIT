@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="exam.ExamDAO">
+
+	<resultMap type="java.utill.HashMap" id="dayTitleMap">
+		<result column="class_no" property="classNo" />
+		<result column="class_title" property="classTitle" />
+	</resultMap>
+	
+	<resultMap type="java.utill.HashMap" id="dayTitleMap">
+		<result column="class_reg_date" property="classRegDate" />
+		<result column="class_title" property="classTitle" />
+	</resultMap>
+	
+	<resultMap type="classBoard" id="classBoardMap">
+		<result column="board_no" property="boardNo" />
+		<result column="writer" property="writer" />
+		<result column="title" property="title" />
+		<result column="contents" property="contents" />
+		<result column="reg_date" property="regDate" />
+		<result column="category_no" property="categoryNo" />
+		<result column="class_no" property="classNo" />
+		<result column="member_no" property="memberNo" />
+		<result column="look" property="look" />
+	</resultMap>
+	
+	<resultMap type="file" id="fileMap">
+		<result column="file_no" property="fileNo" />
+		<result column="original_name" property="originalName" />
+		<result column="original_name" property="originalName" />
+		<result column="file_path" property="filePath" />
+		<result column="file_size" property="fileSize" />
+		<result column="board_no" property="boardNo" />
+	</resultMap>
+	
+	<resultMap type="comment" id="commentMap">
+		<result column="comment_no" property="commentNo" />
+		<result column="board_no" property="boardNo" />
+		<result column="comment_writer" property="commentWriter" />
+		<result column="comment_contents" property="commentContents" />
+		<result column="comment_reg_date" property="commentRegDate" />
+	</resultMap>
+	
+	<resultMap type="member" id="memberMap">
+		<result column="member_no" property="memberNo" />
+	</resultMap>
+	
+	<select id="classList" resultMap="class">
+		select * from class
+	</select>
+
+	<!-- 월별 주제 -->
+	<select id="monthTitleList" parameterType="String" resultMap="monthTitleMap">
+		select class_reg_date, class_title from class where substr(class_reg_date, 1, 5) = #{classRegDate)
+	</select>
+
+	<!-- 날짜별 주제 -->
+	<select id="dayTitleList" parameterType="String" resultMap="dayTitleMap">
+		select class_no, class_title from(select class_no, class_title, rownum a from class where class_reg_date = #{classRegDate} order by class_no asc) where a between 1 and 3;
+	</select>
+	
+	<!-- 주제 입력 -->
+	<insert id="insertTitleInsert" parameterType="String">
+		insert into class (class_no, class_title)
+		values (class_seq.nextval, #{classTitle})
+	</insert>
+	
+	<!-- 주제 수정 -->
+	<insert id="insertTitleModify" parameterType="class">
+		update class set class_title = #{classTitle} where class_no = #{classNo}
+	</insert>
+	
+	<!-- 수업 별 글 목록 -->
+	<select id="classBoardList" parameterType="int" resultMap="classBoardMap">
+		select * from class_board where class_no = #{classNo}
+	</select>
+	
+	<!-- 글 상세 -->
+	<select id="classBoardDetail" parameterType="int" resultMap="classBoardMap">
+		select * from class_board where board_no = #{boardNo}
+	</select>
+	
+	<!-- 글 입력 -->
+	<insert id="classBoardInsert" parameterType="classBoard">
+		insert into class_board (board_no, writer, title, contents, category_no, class_no, member_no)
+		values (board_no.nextval, #{writer}, #{title}, #{contents}, #{categoryNo}, #{classNo}, #{memberNo})
+	</insert>
+	
+	<!-- 글 수정 -->
+	<insert id="classBoardModify" parameterType="classBoard">
+		update class_board set
+		title = #{title}, contents = #{contents}
+	</insert>
+	
+	<!-- 조회수 상승 -->
+	<update id="classBoardLook" parameterType="int">
+		update class_board set look = (look+1) where board_no = #{boardNo}
+	</update>
+	
+	<!-- 파일 입력 -->
+	<insert id="fileInsert" parameterType="file">
+		insert into file_board (file_no, system_name, original_name, file_path, file_size, board_no)
+		values file_board_seq.nextval, #{systemName}, #{originalName}, #{filePath}, #{fileSize}, #{boardNo}
+	</insert>
+	
+	<!-- 파일 상세 -->
+	<select id="fileDetail" parameterType="int" resultMap="fileMap">
+		select * from file_board where board_no = #{boardNo}
+	</select>
+	
+	<!-- 댓글 상세 -->
+	<select id="commentDetail" parameterType="int" resultMap="commentMap">
+		select * from comment_board where board_no = #{boardNo}
+	</select>
+	
+	<!-- 댓글 입력 -->
+	<insert id="commentInsert" parameterType="comment">
+		insert into comment_board (comment_no, board_no, comment_writer, comment_contents)
+		values comment_board_seq.nextval, #{boardNo}, #{commentWriter}, #{commentContents}
+	</insert>
+	
+	<!-- 댓글 수정 -->
+	<update id="commentModify" parameterType="comment">
+		update comment_board set
+		comment_contents = #{commentContents}
+		where comment_no = #{commentNo}
+	</update>
+	
+	<!-- 회원 가입 -->
+	<insert id="memberInsert" parameterType="member">
+		insert into member (member_no, id, pass, name, email1, email2, email_key, file_no, address, authority)
+		values (member_no.nextval, #{id}, #{pass}, #{name}, #{email1}, #{email2}, #{emailKey}, #{fileNo}, #{address}, #{authority})
+	</insert>
+	
+	<!-- 회원 상세 -->
+	<select id="memberDetail" parameterType="String" resultMap="memberMap">
+		select * from member where id = #{id}
+	</select>
+	
+</mapper>
