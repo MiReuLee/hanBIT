@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="exam.ExamDAO">
+
+	<resultMap type="exam" id="examMap">
+		<result column="staff_name" property="name"/>
+		<result column="staff_no" property="no"/>
+		<result column="Staff_Skill_No" property="no"/>
+		<result column="Skill_No" property="skillCode"/>
+		<result column="gen" property="gencode"/>
+		<result column="Religion_Name" property="religion"/>
+		<result column="Religion_Code" property="religionCode"/>
+		<result column="school_Code" property="schoolCode"/>
+		<result column="graduate_day" property="day"/>
+		<result column="jumin_no" property="jumin"/>
+	</resultMap>
+	
+	<resultMap type="exam" id="nor">
+		<result column="min" property="startday"/>
+		<result column="max" property="endday"/>
+		<result column="rownum" property="no"/>
+		<result column="Religion_Name" property="name"/>
+		<result column="School_Name" property="name"/>
+		<result column="Skill_Name" property="name"/>
+	</resultMap>
+	
+	<update id="modify" parameterType="exam">
+		update staff set
+		staff_name = #{name}, jumin_no = #{jumin}, school_code = #{schoolCode},
+		religion_code = #{religionCode}, graduate_day = #{day}
+		where staff_no = #{no}
+	</update>
+	
+	<select id="skitest" parameterType="int" resultType="int">
+		select D.Skill_Code from staff z
+		inner join STAFF_SKILL c
+		on z.staff_no = c.staff_no
+		inner join Code_Skill d
+		on c.skill_code = d.skill_code
+		where z.Staff_No = #{no}
+	</select>
+	
+	<select id="jj" parameterType="exam" resultType="int">
+		select count(*) from staff z
+		inner join STAFF_SKILL c
+		on z.staff_no = c.staff_no
+		inner join Code_Skill d
+		on c.skill_code = d.skill_code
+		where z.Staff_No = #{no} and d.skill_code = #{skillCode}
+	</select>
+	
+	<delete id="skidel" parameterType="exam">
+		delete from STAFF_SKILL where staff_no = #{no} and skill_code = #{skillCode}
+	</delete>
+	
+	<update id="modifyski" parameterType="exam">
+		update staff set
+		staff_name = #{name}, jumin_no = #{jumin}, school_code = #{schoolCode},
+		religion_code = #{religionCode}, graduate_day = #{day}
+	</update>
+	
+	<select id="detail" parameterType="int" resultMap="examMap">
+		select * from staff where staff_no = #{no}
+	</select>
+	
+	<select id="detailski" parameterType="int" resultType="int">
+		select D.Skill_Code from staff z
+		inner join STAFF_SKILL c
+		on z.staff_no = c.staff_no
+		inner join Code_Skill d
+		on c.skill_code = d.skill_code
+		where z.Staff_No = #{no}
+	</select>
+	
+	<delete id="skde" parameterType="int">
+		delete from staff_skill where staff_no = #{no}
+	</delete>
+
+	<delete id="stde" parameterType="int">
+		delete from staff where staff_no = #{no}
+	</delete>
+	
+	<select id="no" resultType="int">
+		select staff_seq.nextval from dual
+	</select>
+	
+	<insert id="stin" parameterType="exam">
+		insert into staff
+		(staff_no, staff_name, jumin_no, school_code, religion_code, graduate_day)
+		values (#{no}, #{name}, #{jumin}, #{schoolCode}, #{religionCode}, #{day})
+	</insert>
+	
+	<insert id="skin" parameterType="exam">
+		insert into staff_skill
+		(staff_skill_no, staff_no, skill_code)
+		values (staff_skill_seq.nextval, #{no}, #{skillCode})
+	</insert>
+	
+	<select id="rel" resultMap="nor">
+		select CODE_RELIGION.*, rownum FROM CODE_RELIGION ORDER BY Religion_Code
+	</select>
+	
+	<select id="sch" resultMap="nor">
+		SELECT Code_School.*, rownum FROM Code_School Order BY School_Code
+	</select>
+	
+	<select id="ski" resultMap="nor">
+		select Code_Skill.*, rownum from Code_Skill Order by Skill_Code
+	</select>
+	
+	<select id="date" resultMap="nor">
+		select substr(min(Graduate_Day),0,4) as min, substr(max(Graduate_Day),0,4) as max from staff
+	</select>
+	
+	<select id="search" resultMap="examMap" parameterType="exam">
+		select * from (select q.*, rownum as aaa from (select z.staff_no, z.staff_name, substr(z.jumin_no, 8, 1) as gen,
+		A.Religion_Name, z.graduate_day from
+		(select * from staff y
+		<where>
+			<if test="name != null">
+				y.staff_name like '%' || #{name} || '%'
+			</if>
+			
+			<if test="gencode != null">
+				<if test="gencode > 0">
+					and substr(y.jumin_no, 8, 1) in
+				<if test="gencode == 1">
+					('1', '3', '5', '7', '9')
+				</if>
+				<if test="gencode == 2">
+					('2', '4', '6', '8', '0')
+				</if>
+				</if>
+			</if>
+			
+			<if test="religionCode != 0">
+				and y.religion_code = #{religionCode}
+			</if>
+			
+			<if test="sch != null">
+				and Y.School_Code in
+				<foreach collection="sch" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			
+			and Y.Graduate_Day between
+			
+			<if test="startday != null">
+				#{startday}
+			</if>
+			<if test="startday == null">
+				(select min(staff.graduate_Day) from staff)
+			</if>
+			
+				and
+				
+			<if test="endday != null">
+				#{endday}
+			</if>
+			<if test="startday == null">
+				(select max(staff.graduate_Day) from staff)
+			</if>
+		</where>) z
+		
+		inner join Code_Religion a
+		on z.Religion_Code = a.Religion_Code
+		
+		inner join STAFF_SKILL c
+		on z.staff_no = c.staff_no
+		
+		inner join Code_Skill d
+		on c.skill_code = d.skill_code
+		
+		<where>
+			<if test="ski != null">
+				c.Skill_Code in
+				<foreach collection="ski" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		
+		group by (staff_name, z.staff_no, jumin_no, graduate_day, A.Religion_Name)
+		order by max(z.staff_no) asc) q)
+		where aaa between #{page}*5-4 and #{page}*5
+		
+		order by aaa asc
+	</select>
+	
+	<select id="size" resultType="int" parameterType="exam">
+		select count(*) from (select count(*) from (select * from staff y
+		<where>
+			<if test="name != null">
+				y.staff_name like '%' || #{name} || '%'
+			</if>
+			
+			<if test="gencode != null">
+				<if test="gencode > 0">
+					and substr(y.jumin_no, 8, 1) in
+				<if test="gencode == 1">
+					('1', '3', '5', '7', '9')
+				</if>
+				<if test="gencode == 2">
+					('2', '4', '6', '8', '0')
+				</if>
+				</if>
+			</if>
+			
+			<if test="religionCode > 0">
+				and y.religion_code = #{religionCode}
+			</if>
+			
+			<if test="sch != null">
+				and Y.School_Code in
+				<foreach collection="sch" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			
+			and Y.Graduate_Day between
+			
+			<if test="startday != null">
+				#{startday}
+			</if>
+			<if test="startday == null">
+				(select min(staff.graduate_Day) from staff)
+			</if>
+			
+				and
+				
+			<if test="endday != null">
+				#{endday}
+			</if>
+			<if test="startday == null">
+				(select max(staff.graduate_Day) from staff)
+			</if>
+		</where>
+		) z
+
+		inner join STAFF_SKILL c
+		on z.staff_no = c.staff_no
+		
+		inner join Code_Skill d
+		on c.skill_code = d.skill_code
+		
+		<where>
+			<if test="ski != null">
+				c.Skill_Code in
+				<foreach collection="ski" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		
+		group by z.staff_no)
+	</select>
+	
+</mapper>
