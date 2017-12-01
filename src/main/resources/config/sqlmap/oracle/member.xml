@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.omp.repository.mapper.MemberMapper">
+	<resultMap type="member" id="memberMap">
+		<result column="member_no" property="memberNo" />
+		<result column="id" property="id" />
+		<result column="pass" property="pass" />
+		<result column="name" property="name" />
+		<result column="email1" property="email1" />
+		<result column="email2" property="email2" />
+		<result column="email_key" property="emailKey" />
+		<result column="fileNo" property="file_no" />
+		<result column="address" property="address" />
+		<result column="AUTHORITY" property="authority" />
+	</resultMap>
+
+	<select id="jungBok" parameterType="String" resultType="String">
+		select id from member where id = #{id}
+	</select>
+	
+	<select id="login" parameterType="member" resultMap="memberMap">
+		select * from member where id = #{id} and pass = #{pass}
+	</select>
+	
+	<insert id="insert" parameterType="member">
+		insert into member(member_no, id, pass, name, email1, email2,
+		<if test="fileNo != null">
+		file_no,
+		</if>
+		address, email_key)
+		VALUES (member_no.nextval, #{id}, #{pass}, #{name}, #{email1}, #{email2}, 
+		<if test="fileNo != null">
+		#{fileNo},
+		</if>
+		#{address}, #{emailKey})
+	</insert>
+	
+	<select id="memchk" parameterType="member" resultType="String">
+		select name from member where id = #{id}
+		<if test="emailKey != null">
+		and email_key = #{emailKey} 
+		</if>
+		and authority = 0
+	</select>
+	
+	<update id="up" parameterType="String">
+		update member set authority = authority+1 where id = #{id}
+	</update>
+	
+	<update id="memcha" parameterType="member">
+		update member set email_key = #{emailKey}, email1 = #{email1}, email2 = #{email2} where id = #{id}
+	</update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

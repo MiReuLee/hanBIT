@@ -1,0 +1,136 @@
+@charset "UTF-8";
+/*메뉴버튼 기본 위치*/
+.menuBtn{
+	transition: 1S;
+	overflow: hidden;
+	position: absolute;
+	top: 60%;
+	z-index: 2000 !important;
+}
+.w3-collapse a {font-family: "Roboto", sans-serif;
+	color: white;}
+body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
+/* 메뉴목록 기본 위치 */
+.list-group{
+	top: 25%;
+	transition: 1S;
+	width: 200px;
+	overflow: hidden;
+	position: absolute;	
+	z-index: 2000 !important;
+	text-shadow: 0 0 2px black;
+	background-color: #b7b7b7;
+}
+/* 메뉴 숨김 */
+#menuHidden { 
+	left: -170px;
+}
+/* 메뉴 보임 */
+#menuShow { 
+	left: 0px;
+}
+/* 메뉴버튼 숨김 */
+#btnHidden {  
+	left: 36px; 
+} 
+/* 메뉴버튼 보임 */
+#btnShow {  
+	left: 206px; 
+}
+/* 검색상세 숨김*/
+#serachTypeHidden{
+	height: 0%;
+	opacity: 0;
+}
+/* 검색상세 보임*/
+#serachTypeShow{
+	height: 100%;
+	opacity: 1.0;
+}
+/* 검색상세버튼 숨김*/
+#serachBtnHidden{
+	height: 10%;
+}
+/* 검색상세버튼 보임*/
+#serachBtnShow{
+	height: 100%;
+}
+/* 검색창 기본위치 */
+div.col-lg-6{
+		top: 5%;
+		left: 25%;
+		width: 50%;
+		position: absolute;
+}
+/* 검색상세 기본위치 */
+span.serach-detail{
+		left:30px;
+		border: 0.5px solid black;
+		border-top-color: #545556;
+		background: white;
+		line-height: 0.5px;
+		overflow: hidden;
+		transition: 1S;
+		position: absolute;
+		min-width: 50%;
+}
+/* 검색상세 버튼 위치 */
+.serchDetailBtn{
+	float: right;
+}
+
+/* 검색 리스트 */
+.searchList{
+	float: inherit;
+	padding: 5px;
+	z-index: 2;
+	width: 500px;
+	background-color: white;
+	color: black;
+	position: absolute;
+	overflow: hidden;
+	display: none;
+	font-weight: bold;
+}
+
+/* 컨텐츠 위치 */
+div.contents{
+	background: #ffffff !important;
+	left: 10%;
+	top: 20%;
+	position: absolute;
+	overflow: visible;
+	border: groove 1px #eaeaea;
+	min-width : 80%;
+	min-height : 120%;
+	box-shadow: 0px 5px 5px 5px;
+}
+
+/* 전체 배경설정 */
+html,body {
+	background-color: #545556 !important;
+    min-height: 100%;
+    min-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+/* footer 기본 */
+.container{
+    min-height: 100%;
+    min-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* 홈버튼 위치 */
+.homeBtn{
+	position: absolute;
+	left: 5%;
+	top: 5%;
+}
+
+.logform{
+	position: absolute;
+	top: 5%;
+	left: 85%;
+}

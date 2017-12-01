@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.omp.repository.mapper.StudyMapper">
+
+	<resultMap type="study" id="studyMap">
+		<result column="class_no" property="classNo" />
+		<result column="class_title" property="classTitle" />
+		<result column="class_reg_date" property="classRegDate" />
+	</resultMap>
+
+	<resultMap type="classBoard" id="classBoardMap">
+		<result column="board_no" property="boardNo" />
+		<result column="writer" property="writer" />
+		<result column="title" property="title" />
+		<result column="contents" property="contents" />
+		<result column="reg_date" property="regDate" />
+		<result column="category_no" property="categoryNo" />
+		<result column="class_no" property="classNo" />
+		<result column="member_no" property="memberNo" />
+		<result column="look" property="look" />
+	</resultMap>
+	
+	<resultMap type="fileBoard" id="fileMap">
+		<result column="file_no" property="fileNo" />
+		<result column="system_name" property="systemName" />
+		<result column="original_name" property="originalName" />
+		<result column="file_path" property="filePath" />
+		<result column="file_size" property="fileSize" />
+		<result column="board_no" property="boardNo" />
+	</resultMap>
+
+	<select id="monthTitleList" parameterType="String" resultMap="studyMap">
+		select l.* from
+		(select min(c.class_no) as class_no from
+		class c where
+		substr(c.class_reg_date, 1, 5) = #{classRegDate} group by
+		c.class_reg_date) c
+		inner join class l
+		on c.class_no = l.class_no
+	</select>
+
+	<insert id="titleInsert" parameterType="study">
+		insert into class
+		(class_no, class_title, class_reg_date)
+		values (
+		<choose>
+			<when test="classNo == null">
+			class_seq.nextval
+			</when>
+			<otherwise>
+			#{classNo}
+			</otherwise>
+		</choose>
+		,#{classTitle}, #{classRegDate})
+	</insert>
+
+	<update id="titleUpdate" parameterType="study">
+		update class set
+		class_title = #{classTitle} where class_no = #{classNo}
+	</update>
+
+	<select id="dayTitleList" parameterType="String" resultMap="studyMap">
+		select class_no, class_title from
+		(select class_no, class_title, rownum a from class where
+		class_reg_date = #{classRegDate} order by class_no asc)
+<!-- 		where a = 1 or a between 2 and 7 -->
+	</select>
+
+	<select id="classBoardList" parameterType="int" resultMap="classBoardMap">
+		select * from class_board where class_no = #{classNo} order by reg_date asc
+	</select>
+	
+	<select id="classNo" resultType="int">
+		select class_seq.nextval from dual
+	</select>
+	
+	<select id="classBoardNo" resultType="int">
+		select board_no.nextval from dual
+	</select>
+	
+	<insert id="classBoardInsert" parameterType="classBoard">
+		insert into class_board (board_no, writer, title, contents, category_no, class_no, member_no)
+		values (
+		<choose>
+			<when test="boardNo == null">
+			board_no.nextval
+			</when>
+			<otherwise>
+			#{boardNo}
+			</otherwise>
+		</choose>
+		, #{writer}, #{title}, #{contents}, #{categoryNo}, #{classNo}, #{memberNo})
+	</insert>
+	
+	<select id="classBoardDetail" parameterType="int" resultType="classBoard">
+		select * from class_board where board_no = #{boardNo}
+	</select>
+	
+	<update id="up" parameterType="int">
+		update class_board set look = look + 1 where board_no = #{boardNo}
+	</update>
+	
+	<insert id="file" parameterType="fileBoard">
+		INSERT INTO file_board (file_no, system_name, original_name, file_path, file_size, board_no)
+		values (file_board_seq.nextval, #{systemName}, #{originalName}, #{filePath}, #{fileSize}, #{boardNo})
+	</insert>
+	
+	<select id="fileList" parameterType="int" resultMap="fileMap">
+		select * from file_board where board_no = #{civa}
+	</select>
+</mapper>

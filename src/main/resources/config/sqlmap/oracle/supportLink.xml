@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.omp.repository.mapper.SupportLinkMapper">
+	<resultMap id="supportMap" type="SupportLink">
+		<result column="support_no" property="supportNo" />
+		<result column="title" property="title" />
+		<result column="site" property="site" />
+	</resultMap>
+
+	<insert id="insertSupportLink" parameterType="supportLink">
+ 		insert into support_link(
+			support_no, 
+			title, 
+			site 
+		) values ( 
+			support_link_seq.nextval, 
+		    #{supportNo}, #{site}
+		)
+	</insert>
+	
+	<update id="modifySupportLink" parameterType="supportLink">
+	   update support_link 
+	      set title = #{title}, 
+	          site = #{site}, 
+	    where support_no = #{supportNo}
+	</update>
+	
+	<delete id="deleteSupportLink" parameterType="int">
+		delete
+		  from support_link
+	  	 where support_no = #{supportNo}
+	</delete>
+	
+	<select id="detailSupportLink" parameterType="int" resultMap="supportMap">
+		select * 
+		  from support_link
+	  	 where support_no = #{supportNo}
+	</select>
+	
+	<select id="readSupportLink" resultMap="supportMap" parameterType="supportLink">
+	  	select * 
+	  		from(select rownum rnum, a.*
+	  			from (select *
+	  				from support_link
+	  			order by support_no desc)a)
+	  		where rnum between #{begin} and #{end}
+	</select>
+	
+	<select id="totalSupportLink" resultType="int">
+		select count(*) from support_link
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
