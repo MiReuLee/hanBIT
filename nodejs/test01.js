@@ -1,5 +1,33 @@
 'use strict';
 
+var mysql = require('mysql');
+
+var con = mysql.createConnection({
+    host: "35.187.220.189",
+    port: 3306,
+    user: "vitamin",
+    password: "vita1234",
+    database: "vitamin"
+});
+
+con.connect();
+
+var sql = "select * \
+from vi_resume"
+
+con.query(sql, function (err, res) {
+    if (err) {
+        console.log("에러 발생");
+        console.log(err);
+        return;
+    }
+    res.forEach(function(e) {
+        console.log(e);
+    });
+});
+
+con.end();
+
 var startTime = Date.now();
 
 const {evaluate, kNN, sample} = require('nodeml');

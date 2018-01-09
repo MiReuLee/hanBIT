@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>chating</title>
+        <style>
+            .chat_log {width: 95%; height: 200px;}
+            .name {width: 10%}
+            .message {width: 70%}
+            .chat {width: 10%}
+        </style>
+    </head>
+    <body>
+        <div>
+            <textarea id="chatLog" class="chat_log" readonly="readonly"></textarea>
+        </div>
+        <form id="chat">
+            <input id="name" class="name" type="text" readonly="readonly">
+            <input id="message" class="message" type="text">
+            <input type="submit" class="chat" value="chat">
+        </form>
+        <div id="box" class="box">
+            <script src="/socket.io/socket.io.js"></script>
+            <script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+            <script>
+                var socket = io();
+                $("#chat").on("submit", function (e) {
+                    socket.emit("send message", $("#name").val(), $("#message").val());
+                    $("#message").val("");
+                    e.preventDefault();
+                });
+
+                socket.on("receive message", function (msg) {
+                    $("#chatLog").append(msg+"\n");
+                    $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
+                });
+
+                socket.on("change name", function (name) {
+                    $("#name").val(name)
+                });
+
+                var on = ["MouseEnter", "MouseOver", "MouseExit", "MouseDown", "MouseUp", "MouseDrag", "click"];
+                on.forEach(function (data) {
+                    $(".chat_log").on(data, function () {
+                        document.domain = 'localhost:8080';
+                        console.log((".iframe", window.parent.document).html());
+                        $(".iframe").trigger("click");
+                    })
+                })
+            </script>
+        </div>
+    </body>
+</html>

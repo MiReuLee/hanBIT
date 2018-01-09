@@ -1,0 +1,117 @@
+<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+<link href="mCalendar.css" rel="stylesheet" type="text/css"/>
+
+<div style="height:500px; width:400px;">
+</div>
+
+<script>
+  $.mCalendar = function (obj, start, end) {
+    var jqObj = $(obj);
+    var startDate = new Date(parseInt(start.split("-")[0]), parseInt(start.split("-")[1])-1, 1);
+    var endDate = new Date(parseInt(end.split("-")[0]), parseInt(end.split("-")[1])-1, 1);
+
+    if (startDate.getMonth() != endDate.getMonth() || startDate.getFullYear() != endDate.getFullYear()) {
+      var objList = [jqObj];
+      for (var i = startDate.getMonth(); i <= endDate.getMonth(); i++) {
+        var objClone = $(obj+":eq(0)").clone();
+        objList.push(objClone);
+      }
+      objList.forEach(function (data) {
+        jqObj.after(data)
+        makeCal(data, new Date());
+      })
+    } else {
+      makeCal(obj, startDate);
+    }
+
+    function makeCal(calObj, date) {
+      calObj = $(calObj);
+      date = new Date(date.getFullYear(), date.getMonth(), 1);
+      var weekTitle = $("<div>").addClass("weekTitle");
+
+      var weekTitleStr = ["일", "월", "화", "수", "목", "금", "토"];
+      
+      for (var i = 0; i < weekTitleStr.length; i++) {
+        var day = $("<div>").addClass("day").text(weekTitleStr[i]);
+        if (i == 0) day.addClass("sun");
+        else if (i == weekTitleStr.length) day.addClass("sat");
+
+        day.appendTo(weekTitle);
+      };
+
+      var startDateLastDay = new Date(date.getDate(), date.getMonth(), 0).getDate();
+
+      var yoil = date.getDay();
+      var yy = (date.getFullYear()).toString().substring(2);
+		  var mm = date.getMonth()+1;
+      if (mm.toString().length == 1) mm = "0"+mm;
+
+      var prev = new Date(date.getFullYear(), date.getMonth(), 0);
+      var prevDay = prev.getDate();
+
+      var mCalendar = $("<div>").addClass("mCalendar")
+          .append($("<div>").addClass("title")
+            .append($("<div>").addClass("month").text((date.getMonth()+1)+"월"))
+            .append($("<div>").addClass("year").text(date.getFullYear())))
+          .append(weekTitle);
+
+      calObj.append(mCalendar);
+
+      mCalendar.append($("<div>").addClass("week"));
+        for (var i = 0; i < yoil; i++) {
+          $(".week:eq(0)").append($("<div>").addClass("day prev").text((prevDay+1)-(yoil-i)));
+        }
+        for (var i = 1; i <= 7-yoil; i++) {
+          var dd = i;
+          if (dd.toString().length == 1) dd = "0"+dd;
+          var day = $("<div>").addClass("day").text(i);
+
+          if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) == i) {
+            day.addClass("start");
+          } else if (start.split("-")[1] == mm && parseInt(end.split("-")[2]) == i) {
+            day.addClass("end");
+          }
+          if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) <= i && parseInt(end.split("-")[2]) >= i) {
+            day.addClass("select");
+          }
+
+          if(i == 7-yoil) day.addClass("sat");
+          else if (i == 1 && yoil == 0) day.addClass("sun");
+          $(".week:eq(0)").append(day);
+        }
+        var weekCnt = 1;
+        var week = $(".week:eq(0)")
+
+        for (var i = 7-yoil+1; i <= startDateLastDay; i++) {
+          var dd = i;
+          if (dd.toString().length == 1) dd = "0"+dd;
+          var nowYoil = week.find("div").length;
+          var day = $("<div>").addClass("day").text(i);
+
+          if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) == i) {
+            day.addClass("start");
+          } else if (start.split("-")[1] == mm && parseInt(end.split("-")[2]) == i) {
+            day.addClass("end");
+          }
+          if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) <= i && parseInt(end.split("-")[2]) >= i) {
+            day.addClass("select");
+          }
+
+          if (nowYoil%7 == 0 && i != startDateLastDay) {
+            mCalendar.append($("<div>").addClass("week"));
+            week = $(".week:eq("+weekCnt+++")");
+            day.addClass("sun");
+          } else if (nowYoil%6 == 0) day.addClass("sat");
+          week.append(day)
+
+          if (i == startDateLastDay) {
+            for (var z = 0; z < nowYoil%7; z++) {
+              week.append($("<div>").addClass("day"));
+            }
+          }
+        }       
+    }
+  }
+
+  $.mCalendar("div", "2018-01-04", "2018-02-06");
+</script>
