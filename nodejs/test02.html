@@ -1,7 +1,7 @@
 <script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
 <link href="mCalendar.css" rel="stylesheet" type="text/css"/>
 
-<div style="height:500px; width:400px;">
+<div style="height:500px; width:400px; display: inline-block; margin-left: 5%;">
 </div>
 
 <script>
@@ -11,22 +11,27 @@
     var endDate = new Date(parseInt(end.split("-")[0]), parseInt(end.split("-")[1])-1, 1);
 
     if (startDate.getMonth() != endDate.getMonth() || startDate.getFullYear() != endDate.getFullYear()) {
-      var objList = [jqObj];
-      for (var i = startDate.getMonth(); i <= endDate.getMonth(); i++) {
+      var objList = [];
+      for (var i = startDate.getMonth(); i < endDate.getMonth(); i++) {
         var objClone = $(obj+":eq(0)").clone();
         objList.push(objClone);
       }
+      makeCal(obj, startDate);
+      var month = startDate.getMonth()+1;
+      var last = jqObj;
       objList.forEach(function (data) {
-        jqObj.after(data)
-        makeCal(data, new Date());
+        last.after(data);
+        last = data;
+        makeCal(data, new Date(new Date().getFullYear(), month++));
       })
     } else {
       makeCal(obj, startDate);
     }
 
-    function makeCal(calObj, date) {
+    function makeCal(calObj, date, month) {
       calObj = $(calObj);
       date = new Date(date.getFullYear(), date.getMonth(), 1);
+      if (month) date.setMonth(month+1);
       var weekTitle = $("<div>").addClass("weekTitle");
 
       var weekTitleStr = ["일", "월", "화", "수", "목", "금", "토"];
@@ -39,7 +44,7 @@
         day.appendTo(weekTitle);
       };
 
-      var startDateLastDay = new Date(date.getDate(), date.getMonth(), 0).getDate();
+      var startDateLastDay = new Date(date.getDate(), date.getMonth()+1, 0).getDate();
 
       var yoil = date.getDay();
       var yy = (date.getFullYear()).toString().substring(2);
@@ -59,7 +64,7 @@
 
       mCalendar.append($("<div>").addClass("week"));
         for (var i = 0; i < yoil; i++) {
-          $(".week:eq(0)").append($("<div>").addClass("day prev").text((prevDay+1)-(yoil-i)));
+          mCalendar.find(".week:eq(0)").append($("<div>").addClass("day prev").text((prevDay+1)-(yoil-i)));
         }
         for (var i = 1; i <= 7-yoil; i++) {
           var dd = i;
@@ -68,19 +73,27 @@
 
           if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) == i) {
             day.addClass("start");
-          } else if (start.split("-")[1] == mm && parseInt(end.split("-")[2]) == i) {
+          } else if (end.split("-")[1] == mm && parseInt(end.split("-")[2]) == i) {
             day.addClass("end");
           }
-          if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) <= i && parseInt(end.split("-")[2]) >= i) {
-            day.addClass("select");
+          if (start.split("-")[1] != end.split("-")[1]) {
+            if (start.split("-")[1] <= mm && start.split("-")[2] <= i && end.split("-")[1] != mm) {
+              day.addClass("select");
+            } else if (end.split("-")[1] >= mm && end.split("-")[2] >= i && start.split("-")[1] != mm) {
+              day.addClass("select");
+            }
+          } else {
+            if (start.split("-")[1] <= mm && start.split("-")[2] <= i && end.split("-")[2] >= i) {
+              day.addClass("select");
+            }
           }
 
           if(i == 7-yoil) day.addClass("sat");
           else if (i == 1 && yoil == 0) day.addClass("sun");
-          $(".week:eq(0)").append(day);
+          mCalendar.find(".week:eq(0)").append(day);
         }
         var weekCnt = 1;
-        var week = $(".week:eq(0)")
+        var week = mCalendar.find(".week:eq(0)");
 
         for (var i = 7-yoil+1; i <= startDateLastDay; i++) {
           var dd = i;
@@ -90,22 +103,30 @@
 
           if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) == i) {
             day.addClass("start");
-          } else if (start.split("-")[1] == mm && parseInt(end.split("-")[2]) == i) {
+          } else if (end.split("-")[1] == mm && parseInt(end.split("-")[2]) == i) {
             day.addClass("end");
           }
-          if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) <= i && parseInt(end.split("-")[2]) >= i) {
-            day.addClass("select");
+          if (start.split("-")[1] != end.split("-")[1]) {
+            if (start.split("-")[1] <= mm && start.split("-")[2] <= i && end.split("-")[1] != mm) {
+              day.addClass("select");
+            } else if (end.split("-")[1] >= mm && end.split("-")[2] >= i && start.split("-")[1] != mm) {
+              day.addClass("select");
+            }
+          } else {
+            if (start.split("-")[1] <= mm && start.split("-")[2] <= i && end.split("-")[2] >= i) {
+              day.addClass("select");
+            }
           }
 
           if (nowYoil%7 == 0 && i != startDateLastDay) {
             mCalendar.append($("<div>").addClass("week"));
-            week = $(".week:eq("+weekCnt+++")");
+            week = mCalendar.find(".week:eq("+weekCnt+++")");
             day.addClass("sun");
           } else if (nowYoil%6 == 0) day.addClass("sat");
-          week.append(day)
+          week.append(day);
 
-          if (i == startDateLastDay) {
-            for (var z = 0; z < nowYoil%7; z++) {
+          if (i == startDateLastDay && nowYoil != 6) {
+            for (var z = 0; z < 6-nowYoil; z++) {
               week.append($("<div>").addClass("day"));
             }
           }
@@ -113,5 +134,5 @@
     }
   }
 
-  $.mCalendar("div", "2018-01-04", "2018-02-06");
+  $.mCalendar("div", "2018-03-04", "2018-05-06");
 </script>
