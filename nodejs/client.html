@@ -7,6 +7,7 @@
             .name {width: 10%}
             .message {width: 70%}
             .chat {width: 10%}
+            iframe {display: none}
         </style>
     </head>
     <body>
@@ -18,6 +19,7 @@
             <input id="message" class="message" type="text">
             <input type="submit" class="chat" value="chat">
         </form>
+        <iframe></iframe>
         <div id="box" class="box">
             <script src="/socket.io/socket.io.js"></script>
             <script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -29,23 +31,25 @@
                     e.preventDefault();
                 });
 
+                var src = "http://192.168.0.146:8080/vitamin/search/test.do";
+                
                 socket.on("receive message", function (msg) {
                     $("#chatLog").append(msg+"\n");
                     $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
+                    $("iframe").attr("src", src+"?msg="+msg)
                 });
-
+                
                 socket.on("change name", function (name) {
                     $("#name").val(name)
                 });
-
-                var on = ["MouseEnter", "MouseOver", "MouseExit", "MouseDown", "MouseUp", "MouseDrag", "click"];
+                
+                /* var on = ["MouseEnter", "MouseOver", "MouseExit", "MouseDown", "MouseUp", "MouseDrag", "click"];
                 on.forEach(function (data) {
                     $(".chat_log").on(data, function () {
-                        document.domain = 'localhost:8080';
                         console.log((".iframe", window.parent.document).html());
                         $(".iframe").trigger("click");
                     })
-                })
+                }) */
             </script>
         </div>
     </body>

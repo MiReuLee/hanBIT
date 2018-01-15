@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Raleway');
 
-* {
+div.mCalendar {
     font-family: 'Raleway','Open Sans','helvetica','sans-serif';
 }
 
@@ -12,7 +12,7 @@ div.mCalendar {
 }
 
 div.mCalendar > div {
-    flex: 1 0 auto;
+    flex: 1 1;
 }
 
 div.mCalendar div.title {
@@ -35,6 +35,7 @@ div.mCalendar div.year {
 
 div.mCalendar div.week, div.mCalendar div.weekTitle {
     display: flex;
+    align-items: center;
 }
 
 div.mCalendar div.weekTitle {
@@ -44,24 +45,49 @@ div.mCalendar div.weekTitle {
 }
 
 div.mCalendar div.day {
-    height:  50px;
-    display:  inline-block;
+    height: 50px;
+    display: flex;
     flex: 1 1;
     text-align: center;
     line-height:  50px;
+    align-items: center;
+}
+
+div.mCalendar div.day > div {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 div.mCalendar div.day.select {
     color: white;
-    background-image: url(https://vignette.wikia.nocookie.net/animal-jam-clans-1/images/2/29/Circle-xxl.png/revision/latest?cb=20161020000053);
+    /* background-image: url(https://vignette.wikia.nocookie.net/animal-jam-clans-1/images/2/29/Circle-xxl.png/revision/latest?cb=20161020000053);
     background-repeat:  no-repeat;
     background-size: 50%;
-    background-position:  center;
+    background-position:  center; */
     font-weight: bold;
 }
 
-div.mCalendar div.day.start, div.mCalendar div.day.end {
-    background-size: 70%;
+div.mCalendar div.day.select  {
+    /* border: 1px solid black;
+    border-radius: 100%; */
+    width: 2.2em;
+    height: 2.2em;
+    background: skyblue;
+    line-height: 2.0em;
+}
+
+/* div.mCalendar div.day.start > div, div.mCalendar div.day.end > div {
+    width: 2.5em;
+    height: 2.5em;
+    line-height: 2.5em;
+} */
+
+div.mCalendar div.day.start {
+    border-radius: 100% 0 0 100%;
+}
+
+div.mCalendar div.day.end {
+    border-radius: 0 100% 100% 0;
 }
 
 div.mCalendar div.day.prev {
@@ -74,4 +100,12 @@ div.mCalendar div.day.sun {
 
 div.mCalendar div.day.sat {
     color: blue;
+}
+
+div.mCalendar div.day.now {
+    border: 3px solid green;
+}
+
+div.mCalendar div.day:hover {
+    background: #c4bebe;
 }

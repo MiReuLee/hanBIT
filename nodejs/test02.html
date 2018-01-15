@@ -5,134 +5,186 @@
 </div>
 
 <script>
-  $.mCalendar = function (obj, start, end) {
-    var jqObj = $(obj);
-    var startDate = new Date(parseInt(start.split("-")[0]), parseInt(start.split("-")[1])-1, 1);
-    var endDate = new Date(parseInt(end.split("-")[0]), parseInt(end.split("-")[1])-1, 1);
-
-    if (startDate.getMonth() != endDate.getMonth() || startDate.getFullYear() != endDate.getFullYear()) {
+$.mCalendar = function(obj, start, end, division) {
+  if (!division) division = "-";
+  var jqObj = $(obj);
+  var startDate = new Date(parseInt(start.split(division)[0]), parseInt(start.split(division)[1]) - 1, 1);
+  var endDate = new Date(parseInt(end.split(division)[0]), parseInt(end.split(division)[1]) - 1, 1);
+  if (startDate > endDate) return;
+  if (startDate.getMonth() != endDate.getMonth() || startDate.getFullYear() != endDate.getFullYear()) {
       var objList = [];
-      for (var i = startDate.getMonth(); i < endDate.getMonth(); i++) {
-        var objClone = $(obj+":eq(0)").clone();
+
+      var months;
+      months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+      months -= startDate.getMonth() + 1;
+      months += endDate.getMonth() + 1;
+
+      for (var i = 0; i < months; i++) {
+        var objClone = $(obj + ":eq(0)").clone();
         objList.push(objClone);
       }
+
       makeCal(obj, startDate);
-      var month = startDate.getMonth()+1;
+      var year = startDate.getFullYear();
+      var month = startDate.getMonth() + 1;
+      var standardMonth = startDate.getMonth();
       var last = jqObj;
-      objList.forEach(function (data) {
-        last.after(data);
-        last = data;
-        makeCal(data, new Date(new Date().getFullYear(), month++));
+      objList.forEach(function(data, i) {
+          last.after(data);
+          last = data;
+          if (i != 0 && standardMonth >= month) {
+            year++;
+          }
+          makeCal(data, new Date(year, month++));
       })
-    } else {
+  } else {
       makeCal(obj, startDate);
-    }
-
-    function makeCal(calObj, date, month) {
-      calObj = $(calObj);
-      date = new Date(date.getFullYear(), date.getMonth(), 1);
-      if (month) date.setMonth(month+1);
-      var weekTitle = $("<div>").addClass("weekTitle");
-
-      var weekTitleStr = ["일", "월", "화", "수", "목", "금", "토"];
-      
-      for (var i = 0; i < weekTitleStr.length; i++) {
-        var day = $("<div>").addClass("day").text(weekTitleStr[i]);
-        if (i == 0) day.addClass("sun");
-        else if (i == weekTitleStr.length) day.addClass("sat");
-
-        day.appendTo(weekTitle);
-      };
-
-      var startDateLastDay = new Date(date.getDate(), date.getMonth()+1, 0).getDate();
-
-      var yoil = date.getDay();
-      var yy = (date.getFullYear()).toString().substring(2);
-		  var mm = date.getMonth()+1;
-      if (mm.toString().length == 1) mm = "0"+mm;
-
-      var prev = new Date(date.getFullYear(), date.getMonth(), 0);
-      var prevDay = prev.getDate();
-
-      var mCalendar = $("<div>").addClass("mCalendar")
-          .append($("<div>").addClass("title")
-            .append($("<div>").addClass("month").text((date.getMonth()+1)+"월"))
-            .append($("<div>").addClass("year").text(date.getFullYear())))
-          .append(weekTitle);
-
-      calObj.append(mCalendar);
-
-      mCalendar.append($("<div>").addClass("week"));
-        for (var i = 0; i < yoil; i++) {
-          mCalendar.find(".week:eq(0)").append($("<div>").addClass("day prev").text((prevDay+1)-(yoil-i)));
-        }
-        for (var i = 1; i <= 7-yoil; i++) {
-          var dd = i;
-          if (dd.toString().length == 1) dd = "0"+dd;
-          var day = $("<div>").addClass("day").text(i);
-
-          if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) == i) {
-            day.addClass("start");
-          } else if (end.split("-")[1] == mm && parseInt(end.split("-")[2]) == i) {
-            day.addClass("end");
-          }
-          if (start.split("-")[1] != end.split("-")[1]) {
-            if (start.split("-")[1] <= mm && start.split("-")[2] <= i && end.split("-")[1] != mm) {
-              day.addClass("select");
-            } else if (end.split("-")[1] >= mm && end.split("-")[2] >= i && start.split("-")[1] != mm) {
-              day.addClass("select");
-            }
-          } else {
-            if (start.split("-")[1] <= mm && start.split("-")[2] <= i && end.split("-")[2] >= i) {
-              day.addClass("select");
-            }
-          }
-
-          if(i == 7-yoil) day.addClass("sat");
-          else if (i == 1 && yoil == 0) day.addClass("sun");
-          mCalendar.find(".week:eq(0)").append(day);
-        }
-        var weekCnt = 1;
-        var week = mCalendar.find(".week:eq(0)");
-
-        for (var i = 7-yoil+1; i <= startDateLastDay; i++) {
-          var dd = i;
-          if (dd.toString().length == 1) dd = "0"+dd;
-          var nowYoil = week.find("div").length;
-          var day = $("<div>").addClass("day").text(i);
-
-          if (start.split("-")[1] == mm && parseInt(start.split("-")[2]) == i) {
-            day.addClass("start");
-          } else if (end.split("-")[1] == mm && parseInt(end.split("-")[2]) == i) {
-            day.addClass("end");
-          }
-          if (start.split("-")[1] != end.split("-")[1]) {
-            if (start.split("-")[1] <= mm && start.split("-")[2] <= i && end.split("-")[1] != mm) {
-              day.addClass("select");
-            } else if (end.split("-")[1] >= mm && end.split("-")[2] >= i && start.split("-")[1] != mm) {
-              day.addClass("select");
-            }
-          } else {
-            if (start.split("-")[1] <= mm && start.split("-")[2] <= i && end.split("-")[2] >= i) {
-              day.addClass("select");
-            }
-          }
-
-          if (nowYoil%7 == 0 && i != startDateLastDay) {
-            mCalendar.append($("<div>").addClass("week"));
-            week = mCalendar.find(".week:eq("+weekCnt+++")");
-            day.addClass("sun");
-          } else if (nowYoil%6 == 0) day.addClass("sat");
-          week.append(day);
-
-          if (i == startDateLastDay && nowYoil != 6) {
-            for (var z = 0; z < 6-nowYoil; z++) {
-              week.append($("<div>").addClass("day"));
-            }
-          }
-        }       
-    }
   }
 
-  $.mCalendar("div", "2018-03-04", "2018-05-06");
+  function makeCal(calObj, date, month) {
+      calObj = $(calObj);
+      date = new Date(date.getFullYear(), date.getMonth(), 1);
+      if (month) date.setMonth(month + 1);
+      var weekTitle = $("<div>").addClass("weekTitle");
+      var weekTitleStr = ["일", "월", "화", "수", "목", "금", "토"];
+      for (var i = 0; i < weekTitleStr.length; i++) {
+          var day = $("<div>").append($("<div>").text(weekTitleStr[i])).addClass("day");
+          if (i == 0) day.addClass("sun");
+          else if (i == weekTitleStr.length) day.addClass("sat");
+          day.appendTo(weekTitle);
+      };
+      var startDateLastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+      var yoil = date.getDay();
+      var yy = (date.getFullYear()).toString().substring(2);
+      var mm = date.getMonth() + 1;
+      if (mm.toString().length == 1) mm = "0" + mm;
+      var prev = new Date(date.getFullYear(), date.getMonth(), 0);
+      var prevDay = prev.getDate();
+      var mCalendar = $("<div>").addClass("mCalendar").append($("<div>").addClass("title").append($("<div>").addClass("month").text((date.getMonth() + 1) + "월")).append($("<div>").addClass("year").text(date.getFullYear()))).append(weekTitle);
+      calObj.append(mCalendar);
+      mCalendar.append($("<div>").addClass("week"));
+      for (var i = 0; i < yoil; i++) {
+          mCalendar.find(".week:eq(0)").append($("<div>").addClass("day prev").append($("<div>").text((prevDay + 1) - (yoil - i))));
+      }
+      for (var i = 1; i <= 7 - yoil; i++) {
+          var dd = i;
+          if (dd.toString().length == 1) dd = "0" + dd;
+          var day = $("<div>").addClass("day").append($("<div>").text(i));
+          var nowDate = new Date();
+          if (yy == nowDate.getYear() - 100 && mm == nowDate.getMonth() + 1 && i == nowDate.getDate()) {
+            day.addClass("now");
+          }
+          if (start.split(division)[0] == "20"+yy && start.split(division)[1] == mm && parseInt(start.split(division)[2]) == i) {
+              day.addClass("start");
+          } else if (end.split(division)[0] == "20"+yy && end.split(division)[1] == mm && parseInt(end.split(division)[2]) == i) {
+              day.addClass("end");
+          }
+
+          if (start.split(division)[0] <= "20"+yy && end.split(division)[0] >= "20"+yy) {
+            if (start.split(division)[0] == end.split(division)[0]) {
+              if (start.split(division)[1] == mm) {
+                if (start.split(division)[2] <= i) {
+                  day.addClass("select");
+                }
+              } else if (end.split(division)[1] == mm) {
+                if (end.split(division)[2] >= i) {
+                  day.addClass("select");
+                }
+              } else if (start.split(division)[1] < mm < end.split(division)[1]) {
+                day.addClass("select");
+              }
+            } else if (start.split(division)[0] != end.split(division)[0] && start.split(division)[0] == "20"+yy && start.split(division)[1] <= mm) {
+              if (start.split(division)[1] == mm) {
+                if (start.split(division)[2] <= i) {
+                  day.addClass("select");
+                }
+              } else if (start.split(division)[1] < mm) {
+                day.addClass("select");
+              }
+            } else if (start.split(division)[0] < "20"+yy) {
+              if (end.split(division)[0] > "20"+yy) {
+                day.addClass("select");
+              } else if (end.split(division)[0] == "20"+yy && end.split(division)[1] >= mm) {
+                if (end.split(division)[1] == mm && end.split(division)[2] >= i) {
+                  day.addClass("select");
+                } else if (end.split(division)[1] > mm) {
+                  day.addClass("select");
+                }
+              }
+            }
+          }
+          if (i == 7 - yoil) day.addClass("sat");
+          else if (i == 1 && yoil == 0) day.addClass("sun");
+          mCalendar.find(".week:eq(0)").append(day);
+      }
+      var weekCnt = 1;
+      var week = mCalendar.find(".week:eq(0)");
+      for (var i = 7 - yoil + 1; i <= startDateLastDay; i++) {
+          var dd = i;
+          if (dd.toString().length == 1) dd = "0" + dd;
+          var nowYoil = week.find("> div").length;
+          var day = $("<div>").addClass("day").append($("<div>").text(i));
+          if (yy == nowDate.getYear() - 100 && mm == nowDate.getMonth() + 1 && i == nowDate.getDate()) {
+              day.addClass("now");
+          }
+          if (start.split(division)[0] == "20"+yy && start.split(division)[1] == mm && parseInt(start.split(division)[2]) == i) {
+              day.addClass("start");
+          } else if (end.split(division)[0] == "20"+yy && end.split(division)[1] == mm && parseInt(end.split(division)[2]) == i) {
+              day.addClass("end");
+          }
+
+          if (start.split(division)[0] <= "20"+yy && end.split(division)[0] >= "20"+yy) {
+            if (start.split(division)[0] == end.split(division)[0]) {
+              if (start.split(division)[1] == mm) {
+                if (start.split(division)[2] <= i) {
+                  day.addClass("select");
+                }
+              } else if (end.split(division)[1] == mm) {
+                if (end.split(division)[2] >= i) {
+                  day.addClass("select");
+                }
+              } else if (start.split(division)[1] < mm < end.split(division)[1]) {
+                day.addClass("select");
+              }
+            } else if (start.split(division)[0] != end.split(division)[0] && start.split(division)[0] == "20"+yy && start.split(division)[1] <= mm) {
+              if (start.split(division)[1] == mm) {
+                if (start.split(division)[2] <= i) {
+                  day.addClass("select");
+                }
+              } else if (start.split(division)[1] < mm) {
+                day.addClass("select");
+              }
+            } else if (start.split(division)[0] < "20"+yy) {
+              if (end.split(division)[0] > "20"+yy) {
+                day.addClass("select");
+              } else if (end.split(division)[0] == "20"+yy && end.split(division)[1] >= mm) {
+                if (end.split(division)[1] == mm && end.split(division)[2] >= i) {
+                  day.addClass("select");
+                } else if (end.split(division)[1] > mm) {
+                  day.addClass("select");
+                }
+              }
+            }
+          }
+          if (nowYoil % 7 == 0) {
+              mCalendar.append($("<div>").addClass("week"));
+              week = mCalendar.find(".week:eq(" + weekCnt++ + ")");
+              day.addClass("sun");
+          } else if (nowYoil % 6 == 0) day.addClass("sat");
+          week.append(day);
+          if (i == startDateLastDay) {
+            nowYoil = day.parent().find("> div").length;
+              for (var z = 0; z < 7 - nowYoil; z++) {
+                  week.append($("<div>").addClass("day"));
+              }
+          }
+      }
+
+      if (weekCnt == 5) {
+        mCalendar.append($("<div>").addClass("week"));
+      }
+  }
+  
+}
+  $.mCalendar("div", "2018/01/04", "2018/09/06", "/");
 </script>
