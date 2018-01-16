@@ -11,7 +11,7 @@ var con = mysql.createConnection({
     database: "vitamin"
 });
 
-var sql = "select * \
+/* var sql = "select * \
 from (SELECT member_no as a_mno, recruit_no a_recno, resume_no a_resno, introduction_no as a_ino, state as a_s \
 FROM vi_company_apply where state = 1) A \
 inner join (SELECT member_no as m_mno, account_no as m_ano, gender as m_gender \
@@ -21,7 +21,16 @@ inner join (SELECT recruit_no as c_mno, company_no as c_cno, career_state, caree
 FROM vi_recruit_write) C \
 on A.a_recno = C.c_mno \
 inner join vi_company D \
-on C.c_cno = D.company_no"
+on C.c_cno = D.company_no" */
+
+var sql = "select * \
+from (SELECT member_no as a_mno, recruit_no a_recno, resume_no a_resno, introduction_no as a_ino, state as a_s \
+FROM vi_company_apply where state = 1) A \
+inner join (SELECT member_no as m_mno, account_no as m_ano, gender \
+FROM vi_member) B \
+on A.a_mno = B.m_mno \
+inner join vi_resume \
+on vi_resume.member_no = a_mno";
 
 con.query(sql, function (err, res) {
     if (err) {
@@ -33,22 +42,22 @@ con.query(sql, function (err, res) {
     
     let train = [];
     for (let i = 0; i < res.length; i++) {
-        train.push(res[i]);
+        train.push({"m_mno": res[i]["m_mno"], "a_recno": res[i]["a_recno"], "gender": res[i]["gender"] == 'm' ? 1 : 2});
     }
     
     const cf = new CF();
-
+    
     cf.maxRelatedItem = 10;
     cf.maxRelatedUser = 50;
-
-    cf.train(train, 'm_mno', 'a_recno', 'career_start', 'career_end', 'school_level');
+    
+    cf.train(train, 'm_mno', 'a_recno', 'gender');
     var test = [{a_recno: 23,
         m_mno: 10,
-        career_state: 1,
-        career_start: -1,
-        career_end: -1,
-        school_level: -1}]
-    let gt = cf.gt(test, 'm_mno', 'a_recno', 'career_start', 'career_end', 'school_level');
+        gender: 1}];
+
+    console.log(train)
+    console.log(test)
+    let gt = cf.gt(test, 'm_mno', 'a_recno', 'gender');
     let gtr = {};
     let users = [];
     for (let user in gt) {
