@@ -1,6 +1,6 @@
 'use strict';
 
-const {CF, evaluation} = require('nodeml');
+const {CF, evaluation, Bayes} = require('nodeml');
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
@@ -23,9 +23,11 @@ on A.a_recno = C.c_mno \
 inner join vi_company D \
 on C.c_cno = D.company_no" */
 
+let bayes = new Bayes();
+
 var sql = "select * \
 from (SELECT member_no as a_mno, recruit_no a_recno, resume_no a_resno, introduction_no as a_ino, state as a_s \
-FROM vi_company_apply where state = 1) A \
+FROM vi_company_apply) A \
 inner join (SELECT member_no as m_mno, account_no as m_ano, gender \
 FROM vi_member) B \
 on A.a_mno = B.m_mno \
@@ -38,40 +40,28 @@ con.query(sql, function (err, res) {
         return;
     }
     
-    /* console.log(res) */
-    
-    let train = [];
     for (let i = 0; i < res.length; i++) {
-        train.push({"m_mno": res[i]["m_mno"], "a_recno": res[i]["a_recno"], "gender": res[i]["gender"] == 'm' ? 1 : 2});
+        bayes.train({
+            "m_mno": res[i]["m_mno"],
+            "gender": res[i]["gender"] == 'm' ? 1 : 2,
+            "job_state": res[i]["job_state"],
+            "marry_state": res[i]["marry_state"],
+            "bohoon_state": res[i]["bohoon_state"],
+            "support_state": res[i]["support_state"],
+            "school_level_no": res[i]["school_level_no"],
+            "career_years": res[i]["career_years"]
+        }, res[i]["a_recno"]);
     }
     
-    const cf = new CF();
-    
-    cf.maxRelatedItem = 10;
-    cf.maxRelatedUser = 50;
-    
-    cf.train(train, 'm_mno', 'a_recno', 'gender');
-    var test = [{a_recno: 23,
-        m_mno: 10,
-        gender: 1}];
-
-    console.log(train)
-    console.log(test)
-    let gt = cf.gt(test, 'm_mno', 'a_recno', 'gender');
-    let gtr = {};
-    let users = [];
-    for (let user in gt) {
-        gtr[user] = gt[user];
-        users.push(user);
-        if (users.length === 100) break;
-    }
-    
-    let result = cf.recommendToUsers(users, 40);
-    
+    let result = bayes.test({m_mno: 30,
+        gender: 1,
+        job_state: 1,
+        marry_state: 1,
+        bohoon_state: 1,
+        support_state: 1,
+        school_level_no: 1,
+        career_years: 1}, {score: true});
     console.log(result);
-
-    let ndcg = evaluation.ndcg(gtr, result);
-    console.log(ndcg);
 });
 
 con.end();

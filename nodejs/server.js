@@ -2,8 +2,8 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-const {evaluate, kNN, sample} = require('nodeml');
 var mysql = require('mysql');
+const {CF, evaluation, Bayes} = require('nodeml');
 
 var con = mysql.createConnection({
     host: "35.187.220.189",
@@ -13,70 +13,115 @@ var con = mysql.createConnection({
     database: "vitamin"
 });
 
-let knn = new kNN();
+var sql2 = "select * \
+from (SELECT member_no as a_mno, recruit_no a_recno, resume_no a_resno, introduction_no as a_ino, state as a_s \
+FROM vi_company_apply) A \
+inner join (SELECT member_no as m_mno, account_no as m_ano, gender \
+FROM vi_member) B \
+on A.a_mno = B.m_mno \
+inner join vi_resume \
+on vi_resume.member_no = a_mno";
 
-knn.train({'fun': 3, 'couple': 1}, 'comedy');
-knn.train({'couple': 1, 'fast': 1, 'fun': 3}, 'comedy');
-knn.train({'fast': 3, 'furious': 2, 'shoot': 2}, 'action');
-knn.train({'furious': 2, 'shoot': 4, 'fun': 1}, 'action');
-knn.train({'fly': 2, 'fast': 3, 'shoot': 2, 'love': 1}, 'action');
+let bayes = new Bayes();
+
+con.query(sql2, function (err, res) {
+    if (err) {
+        console.log("에러 발생1");
+        return;
+    }
+    
+    for (let i = 0; i < res.length; i++) {
+        bayes.train({
+            "m_mno": res[i]["m_mno"],
+            "gender": res[i]["gender"] == 'm' ? 1 : 2,
+            "job_state": res[i]["job_state"],
+            "marry_state": res[i]["marry_state"],
+            "bohoon_state": res[i]["bohoon_state"],
+            "support_state": res[i]["support_state"],
+            "school_level_no": res[i]["school_level_no"],
+            "career_years": res[i]["career_years"]
+        }, res[i]["a_recno"]);
+    } 
+});
 
 var memberNo;
 var password;
 
-app.get("/", function (req, res) {
+app.get("/", function (req, res1) {
     memberNo = req.query.memberNo;
     password = req.query.password;
 
-    con.connect();
-
     var sql = "select * \
     from vi_account where account_no = ? and pwd = ?"
-    console.log(memberNo, password)
 
     var queryRes;
-    
-    con.query(sql, [memberNo, password], function (err, res) {
+
+    console.log(memberNo, password);
+
+    con.query(sql, [memberNo, password], function (err, res2) {
         if (err) {
-            console.log("에러 발생");
-            console.log(err);
+            console.log("에러 발생2");
+            console.log(err)
             return;
         }
-        queryRes = res;
+        queryRes = res2;
+        console.log("로그인 성공");
+
+
+        var sql3 = "select * \
+        from (SELECT member_no as a_mno, recruit_no a_recno, resume_no a_resno, introduction_no as a_ino, state as a_s \
+        FROM vi_company_apply where member_no = ?) A \
+        inner join (SELECT member_no as m_mno, account_no as m_ano, gender \
+        FROM vi_member) B \
+        on A.a_mno = B.m_mno \
+        inner join vi_resume \
+        on vi_resume.member_no = a_mno";
+
+        con.query(sql3, [38], function (err, res3) {
+            if (err) {
+                console.log("에러 발생3");
+                console.log(err)
+                return;
+            }
+            var result = bayes.test({
+                "m_mno": res3[0]["m_mno"],
+                "gender": res3[0]["gender"] == 'm' ? 1 : 2,
+                "job_state": res3[0]["job_state"],
+                "marry_state": res3[0]["marry_state"],
+                "bohoon_state": res3[0]["bohoon_state"],
+                "support_state": res3[0]["support_state"],
+                "school_level_no": res3[0]["school_level_no"],
+                "career_years": res3[0]["career_years"]
+            }, {score: true});
+
+            console.log(result.answer);
+
+            var civa = result["score"];
+
+            var machineData = [];
+            for (var key in civa) {
+                machineData.push({"value": civa[key], "recruit_no": key, "member_no": memberNo});
+            }
+
+            var sql4 = "delete from vi_machine \
+            where member_no = ?";
+
+            con.query(sql4, [memberNo], function (err, res5) {
+                if (err) console.log("에러 aaaaa");
+            })
+
+            var sql5 = "insert into vi_machine (value, recruit_no, member_no) \
+            values (?, ?, ?)";
+
+            machineData.forEach(function (data) {
+                con.query(sql5, [data.value, data.recruit_no, memberNo], function (err, res5) {
+                    if (err) console.log("에러 ㅂㅂㅂㅂㅂ");
+                })
+            });
+        });
     });
-    
-    con.end(function () {
-        console.log(queryRes)
-        res.sendfile("client.html");
-    });
 
-});
-
-var count = 1;
-io.on('connection', function (socket) {
-    console.log('user connected:', socket.id);
-    var name = "user"+memberNo;
-
-    io.to(socket.id).emit('change name', name);
-
-    socket.on('disconnect', function () {
-        console.log('user disconnect', socket.id);
-    });
-
-    socket.on('send message', function (name, text) {
-        var msg = name+": "+text;
-        console.log(msg);
-
-        var obj = {'fun': 3, 'fast': 1, 'love': 1};
-
-        let result = knn.test(obj, true);
-
-        console.log(result);
-
-        knn.train(obj, result[0]);
-        
-        io.emit('receive message', msg);
-    });
+    res1.redirect('http://localhost:8080/vitamin/search/searchRecruit.do');
 });
 
 http.listen('3030', function () {
