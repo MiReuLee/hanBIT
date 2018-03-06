@@ -31,40 +31,44 @@ function mCalendar(t, u, v, w) {
         makeCal(t, y)
     }
     
+    function sc(jQ) {
+        jQ.addClass("select")
+    }
+
     function ifFn(o, i, f, p, j, k) {
     	if (u.split(w)[0] <= "20" + j && v.split(w)[0] >= "20" + j) {
             if (u.split(w)[0] == v.split(w)[0]) {
                 if (u.split(w)[1] == k == v.split(w)[1]) {
                     if (u.split(w)[2] <= i && v.split(w)[2] >= i) {
-                        f.addClass("select")
+                        sc(f)
                     }
                 } else if (u.split(w)[1] == k) {
                     if (u.split(w)[2] <= i) {
-                        f.addClass("select")
+                        sc(f)
                     }
                 } else if (v.split(w)[1] == k) {
                     if (v.split(w)[2] >= i) {
-                        f.addClass("select")
+                        sc(f)
                     }
                 } else if (u.split(w)[1] < k < v.split(w)[1]) {
-                    f.addClass("select")
+                    sc(f)
                 }
             } else if (u.split(w)[0] != v.split(w)[0] && u.split(w)[0] == "20" + j && u.split(w)[1] <= k) {
                 if (u.split(w)[1] == k) {
                     if (u.split(w)[2] <= i) {
-                        f.addClass("select")
+                        sc(f)
                     }
                 } else if (u.split(w)[1] < k) {
-                    f.addClass("select")
+                    sc(f)
                 }
             } else if (u.split(w)[0] < "20" + j) {
                 if (v.split(w)[0] > "20" + j) {
-                    f.addClass("select")
+                    sc(f)
                 } else if (v.split(w)[0] == "20" + j && v.split(w)[1] >= k) {
                     if (v.split(w)[1] == k && v.split(w)[2] >= i) {
-                        f.addClass("select")
+                        sc(f)
                     } else if (v.split(w)[1] > k) {
-                        f.addClass("select")
+                        sc(f)
                     }
                 }
             }
